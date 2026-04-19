@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --navy: #0d1f3c;
+    --navy-mid: #162a4a;
+    --navy-light: #1e3a5f;
+    --gold: #c9a96e;
+    --gold-light: #e8c99a;
+    --cream: #f5f0e8;
+    --glass-bg: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.13);
+    --glass-border-gold: rgba(201, 169, 110, 0.25);
+    --text-primary: #f0ece3;
+    --text-secondary: rgba(240, 236, 227, 0.6);
+    --text-muted: rgba(240, 236, 227, 0.35);
+
+    --background: var(--navy);
+    --foreground: var(--text-primary);
+    --card: var(--glass-bg);
+    --card-foreground: var(--text-primary);
+    --popover: var(--navy-mid);
+    --popover-foreground: var(--text-primary);
+    --primary: 38 92% 50%;
+    --primary-foreground: 210 60% 15%;
+    --secondary: var(--glass-bg);
+    --secondary-foreground: var(--text-secondary);
+    --muted: var(--glass-bg);
+    --muted-foreground: var(--text-muted);
+    --accent: 38 92% 50%;
+    --accent-foreground: 210 60% 15%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--glass-border);
+    --input: var(--glass-border);
+    --ring: var(--gold);
+    --radius: 20px;
+
+    /* Charts */
+    --chart-1: 38 92% 50%;
+    --chart-2: 210 60% 45%;
+    --chart-3: 158 64% 35%;
+    --chart-4: 270 50% 50%;
+    --chart-5: 0 72% 51%;
+
+    /* Sidebar */
+    --sidebar: var(--navy-mid);
+    --sidebar-foreground: var(--text-secondary);
+    --sidebar-primary: var(--gold);
+    --sidebar-primary-foreground: var(--navy);
+    --sidebar-accent: var(--glass-bg);
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: var(--glass-border);
+    --sidebar-ring: var(--gold);
+
+    --font-sans: 'DM Sans', sans-serif;
+    --font-serif: 'DM Serif Display', serif;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    background-color: #0d1f3c !important;
+    color-scheme: dark !important;
+  }
+
+  @media (prefers-color-scheme: light) {
+    html, body {
+      background-color: #0d1f3c !important;
+      color: #f0ece3 !important;
+      color-scheme: dark !important;
+    }
+  }
+
+  body {
+      @apply bg-background text-foreground;
+      font-family: var(--font-sans);
+      letter-spacing: -0.01em;
+      min-height: 100vh;
+      position: relative;
+      background: #0d1f3c !important;
+      background-color: #0d1f3c !important;
+      color: #f0ece3 !important;
+      color-scheme: dark;
+  }
+
+  /* Noise Overlay */
+  body::before {
+    content: "";
+    @apply fixed inset-0 z-[9999] pointer-events-none opacity-[0.04];
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, .serif {
+    font-family: var(--font-serif);
+    @apply font-normal;
+  }
+
+  em {
+    font-family: var(--font-serif);
+    @apply italic not-italic text-[#c9a96e];
+  }
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass:hover {
+  border-color: var(--glass-border-gold);
+}
+
+.animate-msg-in {
+  animation: msgIn 0.3s ease-out both;
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.typing-dot {
+  @apply w-1.5 h-1.5 bg-current rounded-full opacity-40;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 110, 0.3);
+  @apply rounded-full;
+}

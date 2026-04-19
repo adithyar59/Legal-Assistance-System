@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegalEase | AI Legal Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #0d1f3c;
+            --navy-mid: #162a4a;
+            --navy-light: #1e3a5f;
+            --gold: #c9a96e;
+            --gold-light: #e8c99a;
+            --cream: #f5f0e8;
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.13);
+            --glass-border-gold: rgba(201, 169, 110, 0.25);
+            --text-primary: #f0ece3;
+            --text-secondary: rgba(240, 236, 227, 0.6);
+            --text-muted: rgba(240, 236, 227, 0.35);
+            --radius-sm: 16px;
+            --radius-md: 20px;
+            --radius-lg: 28px;
+            --radius-xl: 36px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--navy);
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Noise Texture */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Ambient Blobs */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+        .blob-1 { top: -100px; right: -100px; width: 600px; height: 600px; background: radial-gradient(circle, var(--gold), transparent); }
+        .blob-2 { bottom: -100px; left: -100px; width: 500px; height: 500px; background: radial-gradient(circle, #3b82f6, transparent); }
+        .blob-3 { top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 300px; background: radial-gradient(circle, var(--gold-light), transparent); opacity: 0.05; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(201, 169, 110, 0.3); border-radius: 2px; }
+
+        /* Typography */
+        h1, h2, h3, .serif { font-family: 'DM Serif Display', serif; font-weight: 400; }
+        em { font-family: 'DM Serif Display', serif; font-style: italic; color: var(--gold); }
+
+        /* Shared Components */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass:hover { border-color: var(--glass-border-gold); }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #c9a96e, #e8c99a);
+            color: var(--navy);
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(201, 169, 110, 0.35);
+            transition: all 0.2s ease;
+        }
+        .btn-gold:hover { transform: scale(1.03); box-shadow: 0 6px 20px rgba(201, 169, 110, 0.45); }
+        .btn-gold:active { transform: scale(0.98); }
+
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(13, 31, 60, 0.65);
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #c9a96e, #e8c99a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(201, 169, 110, 0.35);
+        }
+        .logo-text { line-height: 1; }
+        .logo-text h1 { font-size: 17px; margin-bottom: 2px; }
+        .logo-text p { font-size: 9px; text-transform: uppercase; color: var(--gold); letter-spacing: 2px; font-weight: 500; }
+
+        .nav-links { display: flex; gap: 8px; }
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 13.5px;
+            font-weight: 500;
+            text-decoration: none;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .nav-link svg { width: 14px; height: 14px; }
+        .nav-link:hover { background: rgba(255, 255, 255, 0.07); color: var(--text-primary); }
+        .nav-link.active {
+            background: linear-gradient(135deg, #c9a96e, #e8c99a);
+            color: var(--navy);
+            box-shadow: 0 4px 12px rgba(201, 169, 110, 0.25);
+        }
+
+        /* Page Management */
+        .page { display: none; width: 100%; min-height: calc(100vh - 65px); }
+        .page.active { display: block; animation: pageIn 0.4s ease-out; }
+        @keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Page Header Pattern */
+        .page-header { text-align: center; padding: 48px 24px 40px; margin: 0 auto; max-width: 1100px; }
+        .eyebrow { font-size: 10px; text-transform: uppercase; color: var(--gold); letter-spacing: 2.5px; font-weight: 600; margin-bottom: 12px; display: block; }
+        .page-title { font-size: clamp(32px, 5vw, 46px); letter-spacing: -1px; margin-bottom: 16px; line-height: 1.1; }
+        .page-subtitle { font-size: 15px; font-weight: 300; color: var(--text-secondary); max-width: 520px; margin: 0 auto; line-height: 1.7; }
+
+        /* LEGAL ASSISTANT PAGE */
+        .assistant-container { display: flex; flex-direction: column; height: calc(100vh - 65px); }
+        .assistant-content { flex: 1; overflow-y: auto; padding-bottom: 100px; }
+        
+        .hero-section { padding-top: 60px; text-align: center; }
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(201, 169, 110, 0.12);
+            border: 1px solid rgba(201, 169, 110, 0.25);
+            border-radius: 50px;
+            padding: 6px 12px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 24px;
+        }
+        .hero-title { font-size: clamp(36px, 6vw, 52px); letter-spacing: -1.5px; max-width: 600px; margin: 0 auto 20px; line-height: 1.1; }
+        .hero-subtitle { font-size: 15px; font-weight: 300; color: var(--text-secondary); max-width: 440px; margin: 0 auto 24px; line-height: 1.7; }
+        .disclaimer-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(201, 169, 110, 0.08);
+            border: 1px solid rgba(201, 169, 110, 0.2);
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 11.5px;
+            color: var(--gold-light);
+            opacity: 0.8;
+        }
+
+        .suggestions-label { text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin: 40px 0 16px; }
+        .suggestions-grid { max-width: 680px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+        .suggestion-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 20px;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+        }
+        .suggestion-card:hover { background: rgba(255, 255, 255, 0.11); transform: translateY(-1px); box-shadow: 0 8px 32px rgba(0,0,0,0.25); }
+        .icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(201, 169, 110, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            flex-shrink: 0;
+        }
+        .suggestion-text { font-size: 13.5px; color: var(--text-secondary); flex: 1; }
+        .suggestion-arrow { width: 14px; color: var(--text-muted); }
+
+        /* Chat UI */
+        #chat-container { display: none; max-width: 760px; margin: 40px auto 0; padding: 0 24px; }
+        #chat-messages { display: flex; flex-direction: column; gap: 20px; }
+        .msg { display: flex; gap: 14px; animation: msgIn 0.3s ease-out both; }
+        @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-user { flex-direction: row-reverse; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .avatar-ai { background: linear-gradient(135deg, #c9a96e, #e8c99a); color: var(--navy); }
+        .avatar-user { background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border); color: var(--text-primary); }
+        .bubble {
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+        .msg-user .bubble {
+            background: linear-gradient(135deg, rgba(201, 169, 110, 0.22), rgba(201, 169, 110, 0.12));
+            border: 1px solid rgba(201, 169, 110, 0.25);
+            border-bottom-right-radius: 6px;
+        }
+        .msg-ai .bubble {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-bottom-left-radius: 6px;
+        }
+        .citation {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(201, 169, 110, 0.12);
+            border: 1px solid rgba(201, 169, 110, 0.2);
+            border-radius: 50px;
+            padding: 4px 10px;
+            font-size: 11px;
+            color: var(--gold);
+            margin-top: 12px;
+            font-weight: 500;
+        }
+        .citation svg { width: 11px; }
+
+        .thinking { display: flex; gap: 4px; padding: 10px 0; }
+        .dot { width: 6px; height: 6px; background: var(--gold); border-radius: 50%; opacity: 0.4; animation: pulse 1.2s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
+
+        /* Input Bar */
+        .input-sticky {
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(13, 31, 60, 0.98) 70%, transparent);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 20px 24px 32px;
+        }
+        .input-wrapper {
+            max-width: 760px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: flex-end;
+            padding: 8px 12px;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+        .input-wrapper:focus-within {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.08);
+        }
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            padding: 8px 4px;
+            resize: none;
+            max-height: 120px;
+            min-height: 24px;
+        }
+        textarea::placeholder { color: var(--text-muted); }
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .send-btn:hover { transform: scale(1.05); }
+        .input-footer { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 12px; }
+
+        /* LEARN PAGE */
+        .learn-container { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 40px; }
+        .stat-card { text-align: center; padding: 24px; border-radius: var(--radius-lg); }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-num { font-size: 40px; color: var(--gold); margin-bottom: 4px; }
+        .stat-label { font-size: 12px; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 1px; font-weight: 500; }
+
+        .modules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+        .module-card {
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .module-card:hover { transform: translateY(-4px); box-shadow: 0 12px 48px rgba(0,0,0,0.3); }
+        .module-accent { position: absolute; top: 0; right: 0; width: 120px; height: 120px; border-bottom-left-radius: var(--radius-xl); opacity: 0.07; pointer-events: none; }
+        .module-top { padding: 28px 28px 20px; flex: 1; }
+        .module-cat { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 16px; display: block; }
+        .module-icon { width: 48px; height: 48px; border-radius: 14px; background: rgba(201, 169, 110, 0.15); border: 1px solid rgba(201, 169, 110, 0.25); display: flex; align-items: center; justify-content: center; color: var(--gold); margin-bottom: 20px; }
+        .module-title { font-size: 20px; margin-bottom: 10px; }
+        .module-desc { font-size: 13px; font-weight: 300; color: var(--text-secondary); line-height: 1.6; }
+        .module-bottom { padding: 16px 28px; border-top: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
+        .module-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); }
+        .module-meta span { display: flex; align-items: center; gap: 5px; }
+        .module-meta svg { width: 12px; }
+        .btn-module { padding: 8px 16px; font-size: 12px; gap: 6px; }
+
+        /* TOPICS PAGE */
+        .topics-container { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+        .topics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 40px; }
+        .topic-tile {
+            border-radius: var(--radius-md);
+            padding: 28px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 14px;
+            cursor: pointer;
+        }
+        .topic-tile:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.1); }
+        .topic-icon { width: 52px; height: 52px; border-radius: 16px; background: rgba(201, 169, 110, 0.1); border: 1px solid rgba(201, 169, 110, 0.25); color: var(--gold); display: flex; align-items: center; justify-content: center; }
+        .topic-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+        .topic-count { font-size: 11px; color: var(--text-muted); }
+
+        /* NGO DASHBOARD */
+        .ngo-container { max-width: 1100px; margin: 0 auto; padding: 0 24px 80px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 24px; }
+        .full-width { grid-column: 1 / -1; }
+        .dashboard-card { padding: 32px; border-radius: var(--radius-lg); position: relative; overflow: hidden; }
+        .card-label { font-size: 10px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 12px; display: block; }
+        .card-num { font-size: 48px; margin-bottom: 4px; }
+        .card-subtitle { font-size: 15px; color: var(--text-secondary); margin-bottom: 24px; }
+        
+        .bar-chart { display: flex; align-items: flex-end; height: 80px; gap: 6px; margin-top: 20px; }
+        .bar { flex: 1; border-radius: 6px 6px 0 0; background: linear-gradient(to top, rgba(201, 169, 110, 0.5), rgba(201, 169, 110, 0.15)); transition: all 0.3s ease; }
+        .bar:hover { background: linear-gradient(135deg, #c9a96e, #e8c99a); }
+
+        .case-list { display: flex; flex-direction: column; gap: 14px; }
+        .case-row { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+        .dot-indicator { width: 8px; height: 8px; border-radius: 50%; }
+        .progress-track { flex: 1; height: 4px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; overflow: hidden; margin: 0 12px; max-width: 80px; }
+        .progress-fill { height: 100%; border-radius: 2px; }
+        .percentage { font-size: 12px; font-weight: 600; min-width: 32px; text-align: right; }
+
+        .campaigns-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-top: 20px; }
+        .campaign-card { background: rgba(255, 255, 255, 0.05); padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--glass-border); }
+        .campaign-location { font-size: 10px; color: var(--gold); font-weight: 600; margin-bottom: 4px; }
+        .campaign-name { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+        .campaign-stat { font-size: 11px; color: var(--text-secondary); margin-bottom: 10px; display: block; }
+        .mini-progress { height: 3px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; }
+        .mini-fill { height: 100%; border-radius: 2px; background: var(--gold); }
+
+        .insights-panel { margin-top: 40px; background: linear-gradient(to right, rgba(201, 169, 110, 0.1), rgba(30, 58, 95, 0.1)); border: 1px solid var(--glass-border-gold); border-radius: var(--radius-lg); padding: 32px; }
+        .insights-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 24px; }
+        .insight-item svg { width: 24px; height: 24px; color: var(--gold); margin-bottom: 12px; }
+        .insight-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+        .insight-detail { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { padding: 14px 20px; }
+            .nav-link span { display: none; }
+            .nav-link { padding: 10px; border-radius: 12px; }
+            .nav-link svg { width: 18px; height: 18px; margin: 0; }
+            .page-header { padding: 32px 20px; }
+            .stats-row { grid-template-columns: 1fr; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .insights-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 32px; }
+            .input-sticky { padding: 12px 16px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo" onclick="showPage('assistant')">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>
+            </div>
+            <div class="logo-text">
+                <h1>LegalEase</h1>
+                <p>AI Platform</p>
+            </div>
+        </a>
+        <div class="nav-links">
+            <button class="nav-link active" onclick="showPage('assistant', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Assistant</span>
+            </button>
+            <button class="nav-link" onclick="showPage('learn', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                <span>Learn</span>
+            </button>
+            <button class="nav-link" onclick="showPage('topics', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3L9 22 15 2 19 12h3"/></svg>
+                <span>Topics</span>
+            </button>
+            <button class="nav-link" onclick="showPage('ngo', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                <span>NGO</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page 1: Legal Assistant -->
+    <div id="assistant" class="page active">
+        <div class="assistant-container">
+            <div class="assistant-content" id="chat-scroller">
+                <div id="hero-assistant" class="hero-section">
+                    <div class="badge-pill">
+                        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        Powered by Indian Law
+                    </div>
+                    <h1 class="hero-title">Your <em>Legal Guide,</em> in Plain Language</h1>
+                    <p class="hero-subtitle">Simplifying complex laws into clear, actionable awareness for every citizen.</p>
+                    <div class="disclaimer-pill">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Legal awareness only — not legal advice
+                    </div>
+
+                    <div class="suggestions-label">Try Asking</div>
+                    <div class="suggestions-grid">
+                        <div class="suggestion-card glass" onclick="sendSuggestion(this)">
+                            <div class="icon-box">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                            </div>
+                            <span class="suggestion-text">My employer has not paid my salary for two months. What can I do?</span>
+                            <svg class="suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+                        <div class="suggestion-card glass" onclick="sendSuggestion(this)">
+                            <div class="icon-box">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                            </div>
+                            <span class="suggestion-text">I received a defective product from an online store and they refuse to refund.</span>
+                            <svg class="suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+                        <div class="suggestion-card glass" onclick="sendSuggestion(this)">
+                            <div class="icon-box">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </div>
+                            <span class="suggestion-text">My landlord is refusing to return my security deposit after I moved out.</span>
+                            <svg class="suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+                        <div class="suggestion-card glass" onclick="sendSuggestion(this)">
+                            <div class="icon-box">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+                            </div>
+                            <span class="suggestion-text">I was harassed online. What legal action can I take under IT Act?</span>
+                            <svg class="suggestion-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="chat-container">
+                    <div id="chat-messages"></div>
+                </div>
+            </div>
+
+            <div class="input-sticky">
+                <div class="input-wrapper">
+                    <textarea id="chat-input" rows="1" placeholder="Describe your legal situation or ask a question..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+                    <button class="btn-gold send-btn" onclick="sendMessage()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </button>
+                </div>
+                <p class="input-footer">LegalEase provides legal awareness only. Always consult a qualified lawyer for your situation.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 2: Learn -->
+    <div id="learn" class="page">
+        <div class="learn-container">
+            <header class="page-header">
+                <span class="eyebrow">Legal Education</span>
+                <h1 class="page-title">Master Your <em>Legal Rights</em></h1>
+                <p class="page-subtitle">Structured modules designed to empower you with essential legal knowledge through simple, expert-verified lessons.</p>
+            </header>
+
+            <div class="stats-row">
+                <div class="stat-card glass">
+                    <div class="stat-num">05</div>
+                    <div class="stat-label">Total Modules</div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-num">17</div>
+                    <div class="stat-label">Active Lessons</div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-num">12k</div>
+                    <div class="stat-label">Learners Today</div>
+                </div>
+            </div>
+
+            <div class="modules-grid">
+                <!-- Module 1 -->
+                <div class="module-card glass">
+                    <div class="module-accent" style="background: #c9a96e"></div>
+                    <div class="module-top">
+                        <span class="module-cat">Consumer</span>
+                        <div class="module-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                        </div>
+                        <h3 class="module-title serif">Know Your Consumer Rights</h3>
+                        <p class="module-desc">Learn how to protect yourself against defective products, unfair pricing, and poor service quality under the 2019 Act.</p>
+                    </div>
+                    <div class="module-bottom">
+                        <div class="module-meta">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 15 min</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> 3 lessons</span>
+                        </div>
+                        <button class="btn-gold btn-module">
+                            Start <svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Module 2 -->
+                <div class="module-card glass">
+                    <div class="module-accent" style="background: #e07d3c"></div>
+                    <div class="module-top">
+                        <span class="module-cat">Safety</span>
+                        <div class="module-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                        <h3 class="module-title serif">Cyber Safety Awareness</h3>
+                        <p class="module-desc">Understanding online fraud, identity theft, and the legal measures available to victims under the IT Act 2000.</p>
+                    </div>
+                    <div class="module-bottom">
+                        <div class="module-meta">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 20 min</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> 3 lessons</span>
+                        </div>
+                        <button class="btn-gold btn-module">
+                            Start <svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Module 3 -->
+                <div class="module-card glass">
+                    <div class="module-accent" style="background: #4fa3cf"></div>
+                    <div class="module-top">
+                        <span class="module-cat">Employment</span>
+                        <div class="module-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        </div>
+                        <h3 class="module-title serif">Workers' Rights & Labour Laws</h3>
+                        <p class="module-desc">Your guide to minimum wages, maternity benefits, prevention of workplace harassment, and illegal termination.</p>
+                    </div>
+                    <div class="module-bottom">
+                        <div class="module-meta">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 25 min</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> 4 lessons</span>
+                        </div>
+                        <button class="btn-gold btn-module">
+                            Start <svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Module 4 -->
+                <div class="module-card glass">
+                    <div class="module-accent" style="background: #8b5cf6"></div>
+                    <div class="module-top">
+                        <span class="module-cat">Domestic</span>
+                        <div class="module-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <h3 class="module-title serif">Family Law Essentials</h3>
+                        <p class="module-desc">Essential information on inheritance, domestic violence protection, marriage registration, and custody laws.</p>
+                    </div>
+                    <div class="module-bottom">
+                        <div class="module-meta">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 30 min</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> 4 lessons</span>
+                        </div>
+                        <button class="btn-gold btn-module">
+                            Start <svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+                <!-- Module 5 -->
+                <div class="module-card glass">
+                    <div class="module-accent" style="background: #10b981"></div>
+                    <div class="module-top">
+                        <span class="module-cat">Rental</span>
+                        <div class="module-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        </div>
+                        <h3 class="module-title serif">Property & Tenancy Rights</h3>
+                        <p class="module-desc">Understand your rights as a tenant, rent control laws, eviction procedures, and security deposit recovery.</p>
+                    </div>
+                    <div class="module-bottom">
+                        <div class="module-meta">
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> 20 min</span>
+                            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg> 3 lessons</span>
+                        </div>
+                        <button class="btn-gold btn-module">
+                            Start <svg viewBox="0 0 24 24" width="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 3: Legal Topics -->
+    <div id="topics" class="page">
+        <div class="topics-container">
+            <header class="page-header">
+                <span class="eyebrow">Knowledge Directory</span>
+                <h1 class="page-title">Explore <em>Legal Domains</em></h1>
+                <p class="page-subtitle">Browse through specialized categories to find articles, cases, and summaries related to specific legal interest areas.</p>
+            </header>
+
+            <div class="topics-grid">
+                <div class="topic-tile glass" onclick="askAboutTopic('Consumer Protection')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                    </div>
+                    <div class="topic-name">Consumer Protection</div>
+                    <div class="topic-count">12 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('Cybercrime & IT Act')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+                    </div>
+                    <div class="topic-name">Cybercrime & IT Act</div>
+                    <div class="topic-count">9 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('Labour & Employment')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    </div>
+                    <div class="topic-name">Labour & Employment</div>
+                    <div class="topic-count">15 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('Property & Tenancy')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </div>
+                    <div class="topic-name">Property & Tenancy</div>
+                    <div class="topic-count">11 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('Family Law')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <div class="topic-name">Family Law</div>
+                    <div class="topic-count">13 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('Constitutional Rights')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12h3L9 22 15 2 19 12h3"/></svg>
+                    </div>
+                    <div class="topic-name">Constitutional Rights</div>
+                    <div class="topic-count">8 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('RTI & Public Services')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    </div>
+                    <div class="topic-name">RTI & Public Services</div>
+                    <div class="topic-count">7 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('Criminal Law Basics')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+                    </div>
+                    <div class="topic-name">Criminal Law Basics</div>
+                    <div class="topic-count">10 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('Women\'s Rights')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="9" r="8"/><path d="M12 17v6"/><path d="M9 20h6"/></svg>
+                    </div>
+                    <div class="topic-name">Women's Rights</div>
+                    <div class="topic-count">14 articles</div>
+                </div>
+                <div class="topic-tile glass" onclick="askAboutTopic('Banking & Finance')">
+                    <div class="topic-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+                    </div>
+                    <div class="topic-name">Banking & Finance</div>
+                    <div class="topic-count">6 articles</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Page 4: NGO Dashboard -->
+    <div id="ngo" class="page">
+        <div class="ngo-container">
+            <header class="page-header">
+                <span class="eyebrow">NGO Dashboard</span>
+                <h1 class="page-title">Impact <em>Overview</em></h1>
+                <p class="page-subtitle">Real-time data on citizen engagement, legal query resolution, and active awareness campaigns across the country.</p>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Card 1 -->
+                <div class="dashboard-card glass">
+                    <span class="card-label">Citizens Reached</span>
+                    <h2 class="card-num serif">24,831</h2>
+                    <p class="card-subtitle">individuals served this month</p>
+                    <div class="bar-chart">
+                        <div class="bar" style="height: 45%;"></div>
+                        <div class="bar" style="height: 60%;"></div>
+                        <div class="bar" style="height: 35%;"></div>
+                        <div class="bar" style="height: 80%;"></div>
+                        <div class="bar" style="height: 100%;"></div>
+                        <div class="bar" style="height: 70%;"></div>
+                        <div class="bar" style="height: 55%;"></div>
+                        <div class="bar" style="height: 90%;"></div>
+                        <div class="bar" style="height: 65%;"></div>
+                        <div class="bar" style="height: 85%;"></div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="dashboard-card glass">
+                    <span class="card-label">Queries Resolved</span>
+                    <h2 class="card-num serif text-gold">6,204</h2>
+                    <p class="card-subtitle">legal queries answered via AI</p>
+                    
+                    <div class="case-list">
+                        <div class="case-row">
+                            <div class="dot-indicator" style="background: var(--gold);"></div>
+                            <span style="flex: 1;">Consumer Rights</span>
+                            <div class="progress-track"><div class="progress-fill" style="width: 72%; background: var(--gold);"></div></div>
+                            <span class="percentage">72%</span>
+                        </div>
+                        <div class="case-row">
+                            <div class="dot-indicator" style="background: #4fa3cf;"></div>
+                            <span style="flex: 1;">Labour Law</span>
+                            <div class="progress-track"><div class="progress-fill" style="width: 55%; background: #4fa3cf;"></div></div>
+                            <span class="percentage">55%</span>
+                        </div>
+                        <div class="case-row">
+                            <div class="dot-indicator" style="background: #8b5cf6;"></div>
+                            <span style="flex: 1;">Family Law</span>
+                            <div class="progress-track"><div class="progress-fill" style="width: 40%; background: #8b5cf6;"></div></div>
+                            <span class="percentage">40%</span>
+                        </div>
+                        <div class="case-row">
+                            <div class="dot-indicator" style="background: #10b981;"></div>
+                            <span style="flex: 1;">Property Rights</span>
+                            <div class="progress-track"><div class="progress-fill" style="width: 30%; background: #10b981;"></div></div>
+                            <span class="percentage">30%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="dashboard-card glass full-width">
+                    <span class="card-label">Active Legal Aid Campaigns</span>
+                    <div class="campaigns-grid">
+                        <div class="campaign-card">
+                            <div class="campaign-location">Tamil Nadu</div>
+                            <div class="campaign-name serif">Rural Women's Rights</div>
+                            <span class="campaign-stat">3,400 beneficiaries</span>
+                            <div class="mini-progress"><div class="mini-fill" style="width: 68%;"></div></div>
+                        </div>
+                        <div class="campaign-card">
+                            <div class="campaign-location">Maharashtra</div>
+                            <div class="campaign-name serif">Tenant Protection Drive</div>
+                            <span class="campaign-stat">1,850 beneficiaries</span>
+                            <div class="mini-progress"><div class="mini-fill" style="width: 42%; background: #4fa3cf;"></div></div>
+                        </div>
+                        <div class="campaign-card">
+                            <div class="campaign-location">Delhi</div>
+                            <div class="campaign-name serif">Gig Worker Awareness</div>
+                            <span class="campaign-stat">2,100 beneficiaries</span>
+                            <div class="mini-progress"><div class="mini-fill" style="width: 55%; background: #10b981;"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights Panel -->
+            <div class="insights-panel glass">
+                <h3 class="serif" style="font-size: 20px;">Community Awareness Insights</h3>
+                <div class="insights-grid">
+                    <div class="insight-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        <div class="insight-title">Rising Engagement</div>
+                        <p class="insight-detail">Interaction volume increased by 140% this quarter, particularly in Tier-2 and Tier-3 cities.</p>
+                    </div>
+                    <div class="insight-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <div class="insight-title">Knowledge Gaps</div>
+                        <p class="insight-detail">Digital privacy and UPI fraud protection are identified as the primary areas needing immediate educational focus.</p>
+                    </div>
+                    <div class="insight-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+                        <div class="insight-title">Resolution Speed</div>
+                        <p class="insight-detail">Average time to clarify legal concepts has dropped from 4 hours (manual) to 2 seconds via AI assistant.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatInput = document.getElementById('chat-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatContainer = document.getElementById('chat-container');
+        const heroAssistant = document.getElementById('hero-assistant');
+        const scroller = document.getElementById('chat-scroller');
+
+        const cannedResponses = {
+            "My employer has not paid my salary for two months. What can I do?": {
+                text: "Under the **Payment of Wages Act, 1936**, every employer is legally bound to pay wages within the prescribed time limit (usually by the 7th or 10th of the following month).\n\nIf your salary is delayed by two months, you should follow these steps:\n1. Send a formal written notice to your employer demanding the outstanding salary.\n2. If they do not comply, file a written complaint with the **local Labour Commissioner's office** in your district.\n3. You can also approach the **Labour Court** for recovery of wages plus compensation.",
+                law: "Payment of Wages Act, 1936"
+            },
+            "I received a defective product from an online store and they refuse to refund.": {
+                text: "The **Consumer Protection Act, 2019** provides strong protection for online shoppers. If a product is defective, the seller and the manufacturer are jointly liable.\n\nYou have the following remedies:\n1. Register a complaint on the **National Consumer Helpline (1915)** or via their app.\n2. If unresolved, file a formal complaint with the **District Consumer Disputes Redressal Commission** (District Forum).\n3. Under the **E-Commerce Rules 2020**, the platform must appoint a grievance officer to resolve your issue within one month.",
+                law: "Consumer Protection Act, 2019"
+            },
+            "My landlord is refusing to return my security deposit after I moved out.": {
+                text: "Security deposits are governed by your **Rent Agreement** and state-specific **Rent Control Acts**. The landlord is legally required to return the deposit after deducting legitimate repair costs (if any).\n\nActionable steps:\n1. Send a formal demand notice via registered post citing the Rent Agreement clauses.\n2. If refused, you can file a case before the **Rent Controller** or the **Small Causes Court**.\n3. Depending on the amount and agreement terms, a consumer forum complaint for 'deficiency in service' may also be applicable.",
+                law: "Rent Control Act & Contract Law"
+            },
+            "I was harassed online. What legal action can I take under IT Act?": {
+                text: "Online harassment is a serious criminal offense in India. Several sections of the **Information Technology Act, 2000** and the **Indian Penal Code (IPC)** apply:\n\n1. **IT Act Section 66C/66D**: Covers identity theft and cheating by impersonation.\n2. **IT Act Section 67**: Covers publishing obscene material in electronic form.\n3. **IPC Section 354D**: Specifically covers stalking (including online).\n\nYou should immediately report the incident at **www.cybercrime.gov.in** or visit your local **Cyber Crime Cell**. Ensure you save all screenshots and URLs as evidence.",
+                law: "IT Act, 2000 & IPC"
+            }
+        };
+
+        function showPage(pageId, navEl) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            if (navEl) {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                navEl.classList.add('active');
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight) + 'px';
+        }
+
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function activateChat(text) {
+            heroAssistant.style.display = 'none';
+            chatContainer.style.display = 'block';
+            
+            appendMsg('user', text);
+            showThinking();
+            
+            setTimeout(() => {
+                removeThinking();
+                const response = cannedResponses[text] || { text: "I've noted your question. To give you the most accurate legal awareness information based on Indian law, could you please provide a few more details about your situation?", law: null };
+                appendAiMsg(response.text, response.law);
+            }, 1400);
+        }
+
+        function sendSuggestion(el) {
+            const text = el.querySelector('.suggestion-text').innerText;
+            activateChat(text);
+        }
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            activateChat(text);
+        }
+
+        function appendMsg(role, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg msg-${role}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = `avatar avatar-${role}`;
+            avatar.innerHTML = role === 'ai' ? 
+                '<svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>' : 
+                '<svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerText = text;
+            
+            msgDiv.appendChild(avatar);
+            msgDiv.appendChild(bubble);
+            chatMessages.appendChild(msgDiv);
+            scrollChat();
+        }
+
+        function appendAiMsg(text, law) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg msg-ai`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = `avatar avatar-ai`;
+            avatar.innerHTML = '<svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            // Handle bold text markers manually for simplicity
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            bubble.innerHTML = formattedText;
+            
+            if (law) {
+                const cite = document.createElement('div');
+                cite.className = 'citation';
+                cite.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg> Applicable: ${law}`;
+                bubble.appendChild(cite);
+            }
+            
+            msgDiv.appendChild(avatar);
+            msgDiv.appendChild(bubble);
+            chatMessages.appendChild(msgDiv);
+            scrollChat();
+        }
+
+        function showThinking() {
+            const thinkDiv = document.createElement('div');
+            thinkDiv.id = 'thinking-bubble';
+            thinkDiv.className = 'msg msg-ai';
+            thinkDiv.innerHTML = `
+                <div class="avatar avatar-ai"><svg viewBox="0 0 24 24" width="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg></div>
+                <div class="bubble"><div class="thinking"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+            `;
+            chatMessages.appendChild(thinkDiv);
+            scrollChat();
+        }
+
+        function removeThinking() {
+            const el = document.getElementById('thinking-bubble');
+            if (el) el.remove();
+        }
+
+        function scrollChat() {
+            scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'smooth' });
+        }
+
+        function askAboutTopic(topic) {
+            showPage('assistant', document.querySelector('.nav-link:first-child'));
+            setTimeout(() => {
+                const query = `I want to know more about ${topic} laws in India.`;
+                activateChat(query);
+            }, 100);
+        }
+    </script>
+</body>
+</html>
