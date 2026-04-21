@@ -21,14 +21,14 @@ export interface ActiveAiConfig {
  * Maps provider to its base URL for API calls
  */
 export const PROVIDER_BASE_URLS: Record<AiProvider, string> = {
-  // Direct (support CORS from browsers)
+  // Direct (support CORS natively from browsers)
   openrouter: 'https://openrouter.ai/api/v1/chat/completions',
   openai:     'https://api.openai.com/v1/chat/completions',
-  // Proxied through Vite dev server to bypass CORS
-  groq:       '/proxy/groq/openai/v1/chat/completions',
-  together:   '/proxy/together/v1/chat/completions',
-  stepfun:    '/proxy/stepfun/v1/chat/completions',
-  anthropic:  '/proxy/anthropic/v1/messages',
+  // Proxied through Vite in dev, direct to API in prod (Groq & Together natively support CORS)
+  groq:       import.meta.env.PROD ? 'https://api.groq.com/openai/v1/chat/completions' : '/proxy/groq/openai/v1/chat/completions',
+  together:   import.meta.env.PROD ? 'https://api.together.xyz/v1/chat/completions' : '/proxy/together/v1/chat/completions',
+  stepfun:    import.meta.env.PROD ? 'https://api.stepfun.ai/v1/chat/completions' : '/proxy/stepfun/v1/chat/completions',
+  anthropic:  import.meta.env.PROD ? 'https://api.anthropic.com/v1/messages' : '/proxy/anthropic/v1/messages',
   custom:     'https://openrouter.ai/api/v1/chat/completions',
 }
 

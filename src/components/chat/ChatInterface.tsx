@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils'
 import { askLegalQuestion, type LegalQueryResponse } from '@/lib/api'
 import { HistorySidebar } from './HistorySidebar'
 import { Message, Conversation } from '@/types/chat'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Labour Law': 'bg-blue-100 text-blue-700 border-blue-200',
@@ -85,19 +87,15 @@ function SourceCard({ source }: { source: LegalQueryResponse['sources'][0] }) {
 
 function AssistantMessage({ message }: { message: Message }) {
   const { response } = message
-  const paragraphs = message.content.split('\n').filter((p) => p.trim())
 
   return (
     <div className="animate-msg-in space-y-4">
       {/* Answer */}
       <div className="bg-white/5 border border-white/10 rounded-[20px] rounded-tl-[6px] p-5 backdrop-blur-xl shadow-sm max-w-2xl text-[#f0ece3]">
-        <div className="space-y-3">
-          {paragraphs.map((para, i) => {
-            if (para.startsWith('**') && para.endsWith('**')) {
-              return <p key={i} className="font-semibold text-[#f0ece3] mt-4 mb-1 first:mt-0">{para.replace(/\*\*/g, '')}</p>
-            }
-            return <p key={i} className="text-[14px] leading-[1.7] text-[#f0ece3]/90 mb-3 last:mb-0">{para.replace(/\*\*/g, '')}</p>
-          })}
+        <div className="prose prose-invert max-w-none prose-headings:text-[#f0ece3] prose-strong:text-[#f0ece3] prose-p:text-[#f0ece3]/90 prose-li:text-[#f0ece3]/90 prose-td:text-[#f0ece3]/90 prose-p:leading-relaxed prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-th:text-[#c9a96e] prose-a:text-blue-400 hover:prose-a:text-blue-300">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {message.content}
+          </ReactMarkdown>
         </div>
 
         {/* Citation Tag */}

@@ -92,7 +92,7 @@ const categoryKeywords: Record<string, string[]> = {
   ],
   'Criminal Procedures': [
     'fir', 'arrest', 'bail', 'police', 'criminal', 'court', 'magistrate',
-    'detained', 'prison', 'legal aid', 'victim', 'quash',
+    'detained', 'prison', 'legal aid', 'victim', 'quash', 'animal', 'dog', 'pet', 'cruelty', 'killing',
   ],
   'RTI & Government Services': [
     'rti', 'right to information', 'government', 'passport', 'aadhaar',
@@ -398,6 +398,16 @@ const legalDataset: LegalEntry[] = [
     procedure_steps: ['Demand reason for arrest', 'Ask for arrest memo', 'Inform family', 'Request lawyer', 'Must be produced before Magistrate within 24 hours'],
     keywords: ['arrested', 'arrest rights', 'police arrest', 'detention rights', 'jail rights'],
   },
+  {
+    id: 'CP005', category: 'Criminal Procedures', title: 'Cruelty to Animals / Killing a Pet',
+    law_reference: 'IPC Section 428 and 429 / Prevention of Cruelty to Animals Act, 1960',
+    description: 'Killing, maiming, or poisoning an animal is a serious offense under IPC Sections 428 and 429, which prescribe imprisonment up to 5 years. While the basic PCA Act has smaller fines, the IPC clearly criminalizes animal cruelty with severe imprisonment and heavy fines.',
+    simplified_explanation: 'Killing someone\'s dog or other pet is a crime! Under IPC 428 & 429, the offender can be sent to jail for up to 5 years and heavily fined. Call the police and file an FIR immediately.',
+    documents_required: ['Written complaint', 'Photos/Videos of the deceased or injured animal', 'Veterinary/Post-mortem report', 'Witness statements'],
+    authority: 'Police Station / Animal Welfare Board of India / SP/Magistrate',
+    procedure_steps: ['Do not dispose of the body, get a post-mortem done by a government vet', 'Gather photo/video evidence', 'File a police complaint requesting an FIR under IPC Section 429 and PCA Act 1960 Section 11', 'Contact local animal NGOs for legal assistance'],
+    keywords: ['killing a dog', 'animal cruelty', 'pet killed', 'animal abuse', 'poisoning a dog', 'dog killed', 'beating animal'],
+  },
   // ─── RTI & GOVERNMENT SERVICES ────────────────────────────
   {
     id: 'RTI001', category: 'RTI & Government Services', title: 'Filing RTI Application',
@@ -539,25 +549,34 @@ function buildSystemPrompt(context: string): string {
 Your role is to help citizens understand their legal rights by providing SIMPLIFIED, CLEAR explanations of Indian law.
 
 STRICT RULES:
-1. ONLY use the legal information provided in the KNOWLEDGE BASE below
-2. Do NOT provide legal advice or tell users what specific action they should take in their case
-3. Always include the disclaimer at the end
-4. Use simple, easy-to-understand language — avoid legal jargon
-5. Be compassionate and empathetic — users may be in difficult situations
-6. Structure your response clearly with sections
+1. ONLY use the legal information provided in the KNOWLEDGE BASE below. You are STRICTLY BIASED towards Indian Law and the Indian Judiciary.
+2. NEVER mention or explain laws, legal precedents, procedures, or jurisdictions from any country other than India. Unconditionally assume the user is in India.
+3. Do NOT provide legal advice or tell users what specific action they should take in their case.
+4. Use simple, easy-to-understand language — avoid legal jargon.
+5. Be compassionate and empathetic — users may be in difficult situations.
+6. Feel free to use rich markdown (like ### headings, bold **, italics *, bullet points -, numbered lists 1., and tables) to structure your response beautifully.
 
 RESPONSE FORMAT:
-- Start with a brief empathetic acknowledgment
-- Explain the relevant law in simple terms
-- List documents they may need
-- Mention the authority to approach
-- List the general procedure steps
-- End with the disclaimer
+Start with a brief empathetic acknowledgment. Structure your response clearly with sections using appropriate markdown formatting.
+
+IF THE QUESTION IS A SIMPLE GREETING OR OUTSIDE THE KNOWLEDGE BASE, YOU MUST REPLY WITH EXACTLY THIS MESSAGE:
+
+I'm so glad you reached out. I'm here to help you understand your legal rights and provide guidance to the best of my abilities.
+
+### Introduction to LegalEase AI
+Unfortunately, I don't see a specific question from you, and my current knowledge base doesn't have any information to provide a detailed response.
+
+### Next Steps
+If you have a specific legal question or concern, I'd be happy to try and help. However, please note that my responses are limited to my current knowledge base.
+
+### Important Note
+If your question is outside my knowledge base, I recommend consulting a qualified lawyer who can provide personalized advice and guidance.
+
+**Disclaimer**
+Please note that my responses are for general information purposes only and should not be considered as legal advice. I strongly recommend consulting a qualified lawyer for specific guidance on your situation.
 
 KNOWLEDGE BASE:
-${context}
-
-If the question is outside the knowledge base, politely state that you can only answer questions based on your current legal dataset and suggest they consult a qualified lawyer.`
+\${context}`
 }
 
 // ── Public API ──────────────────────────────────────────────────────────────
